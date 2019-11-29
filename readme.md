@@ -19,6 +19,8 @@ The solver solves the given constraint program by backtracking, and returns eith
 
 We provide the class `ConstraintProgram`. Its constructor takes as argument a dictionnary, mapping variables to domains. A variable can be any hashable object.  Domains should be sets.  The method `add_constraint(x, y, rel)`, adds a constraint on the variables x and y. It enforces that x and y are assigned to values u and v respectively such that (u,v) satisfies the given relation.  The method `solve()` tries to find a solution by backtracking, returns `None` in case of failure and a dictionnary variables-values in case of success.  
 
+We also provide a method `solve_iterator` which enumerates all soltions, as well as `solve_lex_smallest` which returns the lexicographically smallest solution.
+
 # The principle
 
 The algorithm performs a depth first exploration of a search tree. Every node corresponds to partial assigment of variables to values, satisfying every constraint involving assigned variables.  Then a branching variable is choosen. A usual simple choice is the variable x with the smallest domain, as this is likely to produce a small subtree.  Then the search loops over all values u from the domain of x, and tries to assign x:=u, each alternative leading to a different search subtree.
@@ -48,11 +50,11 @@ The file `dump_tree` provides a class which permits to print into a DOT file the
 For illustration, we show the exploration trees using the 3 different above mentioned techniques, on the example of the [n-queen](https://en.wikipedia.org/wiki/Eight_queens_puzzle) problem.  We model it with n variables, describing for every row number the column number of the queen in the row.
 
 
-![with backward check](backward.png){:width="600"}
+![with backward check](backward.png)
 
-![with forward check](forward.png){:width="600"}
+![with forward check](forward.png)
 
-![with arc consistency](arcconsistency.png){:width="600"}
+![with arc consistency](arcconsistancy.png)
 
 # Examples
 
