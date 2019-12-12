@@ -59,3 +59,40 @@ For illustration, we show the exploration trees using the 3 different above ment
 # Examples
 
 This constraint programming solver is illustrated with a few examples, the n-queen problem, Sudoku, Eternity, and the [Zebra puzzle](https://en.wikipedia.org/wiki/Zebra_Puzzle).
+
+# Technical details
+
+A variable name can be any hashable object: a number, a string, a tuple, as you like.  Different variables can share the same domain object.  This is because internally, when the domain of a variable is reduced, a new object is created, rather then removing elements for the current domain of the variable.
+
+When adding a constaint between two variables using a boolean function, then this function should be a [closure](https://www.geeksforgeeks.org/python-closures/). This means that all variables it uses should have a fixed value, except of the parameters. For an illustation consider the n-queen problem.
+If we create the constraints like this:
+
+~~~python
+for j in range(n):
+    for i in range(j):
+        C.add_constraint(i, j, lambda u, v: u - v not in {i - j, 0, j - i})
+~~~
+
+then when the predicate is called, the variables i and j might be modified, or even be out of scope. Therefore one needs to create a *closure* using a helper function like this:
+
+~~~python
+def dont_attack(i, j):
+	return lambda u, v: u - v not in {i - j, 0, j - i}
+# 
+for j in N:
+    for i in range(j):
+        C.add_constraint(i, j, dont_attack(i, j))
+~~~
+
+Here the function `dont_attack` returns the lambda function with a context in which the variables i and j are frozen to the value they had a the moment the lambda function was created.  Another possibility is to create an explict constraint, using the following helper function. But it would be less efficient.
+
+~~~python
+def make_explicit(C, i, j, relation):
+	return {(u, v) for u in self.var[i] for v in self.var[j] if relation(u, v)}
+# 
+for j in N:
+    for i in range(j):
+        C.add_constraint(i, j, dont_attack(C, i, j, 
+        	        lambda u, v: u - v not in {i - j, 0, j - i}))
+~~~
+

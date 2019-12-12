@@ -48,7 +48,7 @@ TILEROT = {(t, r) for t in range(n * n) for r in range(4)}
 # var(i,j) indicates the tile and its rotation
 var = {(i, j): TILEROT for i, j in CELLS}
 
-prob = ConstraintProgram(var, "f.dot")
+prob = ConstraintProgram(var)
 
 
 # ---------------- Create the constraints.

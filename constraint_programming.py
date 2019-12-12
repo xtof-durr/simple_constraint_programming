@@ -1,5 +1,6 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 # Christoph Dürr - 2019 - Ecole Centrale Supelec
+# coding=utf-8
 
 from dump_tree import DumpTree
 
@@ -36,11 +37,11 @@ class ConstraintProgram:
                 or a set of valid value pairs.
         """
         if type(relation) is set:
+            R = lambda u, v: (u,v) in relation
+        else:  # ok, relation is a function
             R = relation
-        else:
-            R = {(u, v) for u in self.var[x] for v in self.var[y] if relation(u, v)}
         self.conflict[x].append((y, R))           # keep track for x
-        R_inv = {(v, u) for u, v in R}
+        R_inv = lambda u, v: R(v, u)
         self.conflict[y].append((x, R_inv))       # and symmetrically for y
 
 
@@ -75,7 +76,7 @@ class ConstraintProgram:
         """
         for y, rel in self.conflict[x]:
             v = self.assign[y] 
-            if v is not None and (u, v) not in rel:
+            if v is not None and not rel(u, v):
                 return False   # conflict detected
         return True
 
@@ -119,7 +120,7 @@ class ConstraintProgram:
         u = self.assign[x]
         for y, rel in self.conflict[x]:
             if self.assign[y] is None:
-                support = {v for v in self.var[y] if (u, v) in rel}
+                support = {v for v in self.var[y] if rel(u, v)}
                 if len(support) < len(self.var[x]):
                     Q.add(y)
                 self.var[y] = support
@@ -169,10 +170,10 @@ class ConstraintProgram:
         """
         v = self.assign[y]
         if v is not None:
-            return (v, u) in rel_yx
+            return rel_yx(v, u)
         # else
         for v in self.var[y]:
-            if (v, u) in rel_yx:
+            if rel_yx(v, u):
                 return True
         return False
 
